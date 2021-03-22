@@ -2,6 +2,16 @@
 
 **libcclosure** is a library which adds thread-safe [closures](https://en.wikipedia.org/wiki/Closure_(computer_programming)) as first-class functions to the C language.
 
+Supported operating systems:
+- Linux
+
+Supported CPU architectures:
+- x86 ([cdecl](https://en.wikipedia.org/wiki/X86_calling_conventions#cdecl))
+- x86_64 ([sys v](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI))
+
+Supported multi-threading libraries:
+- [POSIX Threads](https://en.wikipedia.org/wiki/POSIX_Threads)
+
 ## Quick Start
 
 Closures really are first-class C functions in the sense that they can accept arbitrary arguments (including variadic) and have an arbitrary return type. To create one, first define a callback function that accepts the desired arguments and a special closure "context" argument:
@@ -14,10 +24,10 @@ int Callback(CClosureCtx ctx, double filter, size_t numVArgs, ...) {
 }
 ```
 
-To create a closure, you must bind an environment to the callback function (pass `true` as third argument to `CClosureNew` if callback returns an [aggregate type](https://gcc.gnu.org/onlinedocs/gcc-3.4.2/gccint/Aggregate-Return.html) rather than a scalar):
+To create a closure, you must bind an environment to the callback function (pass `true` as the third argument to `CClosureNew` if the callback returns an [aggregate type](https://gcc.gnu.org/onlinedocs/gcc-3.4.2/gccint/Aggregate-Return.html) rather than a scalar):
 
 ```c
-int (*closure)(int, size_t, ...) = CClosureNew(Callback, &someEnv, false);
+int (*closure)(double, size_t, ...) = CClosureNew(Callback, &someEnv, false);
 ```
 
 `CClosureNew` is completely thread-safe assuming that libcclosure was compiled with multi-threading support.
@@ -29,9 +39,9 @@ int val0 = closure(15.0, 2, "some", "string");
 int val1 = closure(8.0, 0);
 ```
 
-The bound closure is thread-safe in the sense that multiple threads may call it in parallel and read its environment. If the closure's callback modifies its environment, however, you must ensure it does so in a thread-safe manner (like by using a mutex).
+The bound closure is thread-safe in the sense that multiple threads may safely call it in parallel and read from its environment. If the closure's callback modifies its environment, however, you must ensure that it does so in a thread-safe manner (like by using a mutex).
 
-Use `CClosureCheck` to determine whether a given reference is to a bound closure:
+Use `CClosureCheck` to determine whether or not a given reference is to a bound closure:
 
 ```c
 bool isClosure = CClosureCheck(closure);
@@ -49,15 +59,15 @@ and retrieve the callback function bound to it using `CClosureGetFcn`:
 void *fcn = CClosureGetFcn(closure);
 ```
 
-Use `CClosureFree` to de-allocate a previously bound closure:
+Use `CClosureFree` to de-allocate a bound closure:
 
 ```c
 void *env = CClosureFree(closure);
 ```
 
-Note that `CClosureFree` returns the bound environment.
+Note that `CClosureFree` returns the previously-bound environment.
 
-`CClosureFree` is thread-safe in the sense that multiple threads may call it (along with `CClosureNew`) in parallel. However, `CClosureFree` does **not** block if other threads (or even the same thread) are in the middle of calls to the closure. Make certain that the closure is no longer in use before de-allocating it.
+`CClosureFree` is thread-safe in the sense that multiple threads may safely call it (along with `CClosureNew`) in parallel. However, `CClosureFree` does **not** block if other threads (or even the same thread) are in the middle of calls to the closure. Make certain that the closure is no longer in use before de-allocating it.
 
 Test whether or not libcclosure was compiled with multi-threading support using the `CCLOSURE_THREAD_TYPE` global:
 
