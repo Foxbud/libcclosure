@@ -1,15 +1,29 @@
 cmake_minimum_required(VERSION 3.19)
+# Copyright 2021 Garrett Fairburn <breadboardfox@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 project(CCLOSURE
     VERSION 1.0.0
-    DESCRIPTION "Closures for C."
+    DESCRIPTION "Thread-safe closures as first-class functions for C "
     LANGUAGES C)
 
 # Define options.
-set(ARCH "x86_64" CACHE STRING "Target architecure: x86 x86_64")
-if(NOT "${ARCH}" STREQUAL "x86" AND NOT "${ARCH}" STREQUAL "x86_64")
+set(BUILD_ARCH "x86_64" CACHE STRING "Target architecure: x86 x86_64")
+if(NOT "${BUILD_ARCH}" STREQUAL "x86" AND NOT "${BUILD_ARCH}" STREQUAL "x86_64")
     message(FATAL_ERROR
-        "\"${ARCH}\" is not a supported architecture!\n"
+        "\"${BUILD_ARCH}\" is not a supported architecture!\n"
         "Supported architectures:"
         " x86"
         " x86_64"
@@ -60,7 +74,7 @@ target_include_directories(cclosure
 target_compile_options(cclosure 
     PRIVATE
         -Wall -Wextra -Werror
-        $<$<STREQUAL:${ARCH},x86>:-m32>
+        $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
 )
 if(THREAD_PTHREADS)
     target_compile_definitions(cclosure
@@ -85,7 +99,7 @@ if(THREAD_PTHREADS)
     target_link_options(cclosure_shared
         PRIVATE
             -rdynamic
-            $<$<STREQUAL:${ARCH},x86>:-m32>
+            $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
     )
 endif()
 
@@ -105,14 +119,14 @@ endif()
 # Installation.
 install(TARGETS cclosure_static cclosure_shared
     EXPORT CClosureTargets
-    LIBRARY DESTINATION "lib$<$<STREQUAL:${ARCH},x86>:32>"
-    ARCHIVE DESTINATION "lib$<$<STREQUAL:${ARCH},x86>:32>"
+    LIBRARY DESTINATION "lib$<$<STREQUAL:${BUILD_ARCH},x86>:32>"
+    ARCHIVE DESTINATION "lib$<$<STREQUAL:${BUILD_ARCH},x86>:32>"
     INCLUDES DESTINATION include
 )
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/cclosure.h"
     DESTINATION include
 )
-if("${ARCH}" STREQUAL "x86")
+if("${BUILD_ARCH}" STREQUAL "x86")
     install(EXPORT CClosureTargets
         FILE CClosureTargets.cmake
         NAMESPACE CClosure::
@@ -144,12 +158,12 @@ if (BUILD_TESTING)
                 -Wall
                 -Wextra
                 -Werror
-                $<$<STREQUAL:${ARCH},x86>:-m32>
+                $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
         )
         target_link_options("${TEST_TARGET}"
             PRIVATE
                 -rdynamic
-                $<$<STREQUAL:${ARCH},x86>:-m32>
+                $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
         )
         target_link_libraries("${TEST_TARGET}" PRIVATE cclosure_shared)
         add_test(NAME "test_${TEST_NAME}" COMMAND "${TEST_TARGET}")

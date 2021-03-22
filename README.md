@@ -18,22 +18,33 @@ This library is heavily inspired by and intended as a more permissively-licensed
 
 ## Build and Installation
 
-This library uses [CMake](https://cmake.org/) to generate its build system. You must have this tool installed.
+This library uses [CMake](https://cmake.org/) to generate its build system.
 
 ### x86_64
 
-```shell
+```
 $ cmake -S . -B build/release_x86_64 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DARCH=x86_64 \
-    -DBUILD_TESTING=OFF
+    -DBUILD_TESTING=OFF \
+    -DBUILD_ARCH=x86_64
 $ cmake --build build/release_x86_64
 # cmake --build build/release_x86_64 --target install
 ```
 
+### x86
+
+```
+$ cmake -S . -B build/release_x86 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_ARCH=x86
+$ cmake --build build/release_x86
+# cmake --build build/release_x86 --target install
+```
+
 ## Quick Start
 
-Closures really are first-class C functions in the sense that they can accept arbitrary arguments (including variadic) and have an arbitrary return type. To create one, first define a callback function that accepts the desired arguments and a special closure "context" argument:
+These closures really are first-class C functions in the sense that they can accept arbitrary arguments (including variadic) and have an arbitrary return type. To create one, first define a callback function that accepts a special closure "context" as its first argument followed by the other desired arguments:
 
 ```c
 int Callback(CClosureCtx ctx, double filter, size_t numVArgs, ...) {
