@@ -2,16 +2,18 @@
 
 **libcclosure** is a library which adds thread-safe [closures](https://en.wikipedia.org/wiki/Closure_(computer_programming)) as first-class functions to the C language.
 
+This library is heavily inspired by and intended as a more permissively-licensed alternative to libffcall's [callback](https://www.gnu.org/software/libffcall/callback.html) module. If your project's license permits the use of [GPL 3.0-licensed](https://www.gnu.org/licenses/gpl-3.0.html) software, you should probably use libffcall instead; it has had more rigorous bug testing and supports a wider range of systems and architectures.
+
 ## Compatibility
 
-### Supported operating systems
+### Supported Operating Systems
 - Linux
 
-### Supported CPU architecture
+### Supported CPU Architectures
 - x86 ([cdecl](https://en.wikipedia.org/wiki/X86_calling_conventions#cdecl))
 - x86_64 ([sys v](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI))
 
-### Supported multi-threading libraries
+### Supported Multi-Threading Libraries
 - [POSIX Threads](https://en.wikipedia.org/wiki/POSIX_Threads)
 
 ## Quick Start

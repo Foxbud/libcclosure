@@ -29,6 +29,8 @@
         "h",
         "init",
         "libcclosure",
+        "libffcall",
+        "libffcall's",
         "malloc",
         "mutex",
         "posix",
