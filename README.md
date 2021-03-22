@@ -4,6 +4,77 @@
 
 ## Quick Start
 
+Closures really are first-class C functions in the sense that they can accept arbitrary arguments (including variadic) and have an arbitrary return type. To create one, first define a callback function that accepts the desired arguments and a special closure "context" argument:
+
+```c
+int Callback(CClosureCtx ctx, double filter, size_t numVArgs, ...) {
+    /* "ctx.env" is a pointer to the closure's environment. */
+
+    /* ... */
+}
+```
+
+To create a closure, you must bind an environment to the callback function (pass `true` as third argument to `CClosureNew` if callback returns an [aggregate type](https://gcc.gnu.org/onlinedocs/gcc-3.4.2/gccint/Aggregate-Return.html) rather than a scalar):
+
+```c
+int (*closure)(int, size_t, ...) = CClosureNew(Callback, &someEnv, false);
+```
+
+`CClosureNew` is completely thread-safe assuming that libcclosure was compiled with multi-threading support.
+
+`closure` can now be called like any other C function, and its bound environment will be implicitly passed to it before the arguments it was called with:
+
+```c
+int val0 = closure(15.0, 2, "some", "string");
+int val1 = closure(8.0, 0);
+```
+
+The bound closure is thread-safe in the sense that multiple threads may call it in parallel and read its environment. If the closure's callback modifies its environment, however, you must ensure it does so in a thread-safe manner (like by using a mutex).
+
+Use `CClosureCheck` to determine whether a given reference is to a bound closure:
+
+```c
+bool isClosure = CClosureCheck(closure);
+```
+
+Retrieve the environment bound to a closure using `CClosureGetEnv`:
+
+```c
+void *env = CClosureGetEnv(closure);
+```
+
+and retrieve the callback function bound to it using `CClosureGetFcn`:
+
+```c
+void *fcn = CClosureGetFcn(closure);
+```
+
+Use `CClosureFree` to de-allocate a previously bound closure:
+
+```c
+void *env = CClosureFree(closure);
+```
+
+Note that `CClosureFree` returns the bound environment.
+
+`CClosureFree` is thread-safe in the sense that multiple threads may call it (along with `CClosureNew`) in parallel. However, `CClosureFree` does **not** block if other threads (or even the same thread) are in the middle of calls to the closure. Make certain that the closure is no longer in use before de-allocating it.
+
+Test whether or not libcclosure was compiled with multi-threading support using the `CCLOSURE_THREAD_TYPE` global:
+
+```c
+switch (CCLOSURE_THREAD_TYPE) {
+    /* Compiled with multi-threading support using POSIX Threads. */
+    case CCLOSURE_THREAD_PTHREADS:
+        break;
+
+    /* Not compiled with any multi-threading support. */
+    case CCLOSURE_THREAD_NONE:
+        break;
+}
+```
+
+## Example
+
 Suppose an external API provides some function that accepts a callback function:
 
 ```c
@@ -17,7 +88,7 @@ List *ListCreate(size_t num, ...);
 void ListForEach(List *list, bool (*callback)(int *element));
 ```
 
-Functions like this typically accept a "data" argument to pass to callback in addition to `element`, but imagine that isn't the case here. That functionality can be recreated using a closure:
+Functions like this typically accept a "data" parameter to pass to callback in addition to `element`, but imagine that isn't the case here. That functionality can be recreated using a closure:
 
 ```c
 /* main.c */
@@ -33,10 +104,10 @@ struct SumGreaterThanEnv {
     int threshold;
 };
 
-/* Function that accepts closure context as first argument. */
+/* Function that accepts closure context as first parameter. */
 static bool SumGreaterThanCallback(CClosureCtx ctx, int *element) {
     /* Closure context contains the bound environment. */
-    SumGreaterThanEnv *env = ctx.env;
+    struct SumGreaterThanEnv *env = ctx.env;
 
     if (*element > env->threshold)
         env->sum += *element;
@@ -48,7 +119,7 @@ int main(void) {
     List *list = ListCreate(5, 3, -10, 77, 42, 15);
 
     /* Instantiate an environment for the closure. */
-    SumGreaterThanEnv *env = malloc(sizeof(SumGreaterThanEnv));
+    struct SumGreaterThanEnv *env = malloc(sizeof(struct SumGreaterThanEnv));
     *env = (SumGreaterThanEnv){
         .sum = 0,
         .threshold = 10
@@ -58,7 +129,7 @@ int main(void) {
     bool (*callback)(int *) = CClosureNew(SumGreaterThanCallback, env, false);
 
     /* Callback is now a first-class function that will be passed environment
-       implicitly to its first parameter. */
+       implicitly as its first parameter. */
     ListForEach(list, callback);
 
     /* Would print "134". */

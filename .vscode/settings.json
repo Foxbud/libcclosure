@@ -29,6 +29,8 @@
         "init",
         "libcclosure",
         "malloc",
+        "mutex",
+        "posix",
         "printf",
         "pthreads",
         "stdbool",
