@@ -183,9 +183,13 @@ if (BUILD_TESTING)
     make_test(agg_return)
     make_test(agg_pass)
     make_test(vargs_pass)
+    make_test(get_fcn)
     make_test(excessive_alloc)
 
     if(THREAD_PTHREADS)
+        make_test(basic_threading)
+        target_link_libraries("${TEST_TARGET}"
+            PRIVATE Threads::Threads)
         make_test(excessive_threading)
         target_link_libraries("${TEST_TARGET}"
             PRIVATE Threads::Threads)

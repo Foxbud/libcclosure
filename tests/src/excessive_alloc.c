@@ -31,7 +31,7 @@ TestCase {
 
     for (size_t idx = 0; idx < NUM_CLOSURES; idx++) {
         AssertBoolEqual(CClosureCheck(closures[idx]), true);
-        AssertInt32Equal(closures[idx](), idx * -2);
+        AssertIntEqual(closures[idx](), (int32_t)(idx * -2));
     }
 
     for (size_t idx = 0; idx < NUM_CLOSURES; idx += 2) {
@@ -41,13 +41,13 @@ TestCase {
 
     for (size_t idx = 1; idx < NUM_CLOSURES; idx += 2) {
         AssertBoolEqual(CClosureCheck(closures[idx]), true);
-        AssertInt32Equal(closures[idx](), idx * -2);
+        AssertIntEqual(closures[idx](), (int32_t)(idx * -2));
     }
 
     int32_t env = 42;
     int32_t (*clos)(void) = CClosureNew(Callback, &env, false);
     AssertBoolEqual(CClosureCheck(clos), true);
-    AssertInt32Equal(clos(), 42);
+    AssertIntEqual(clos(), (int32_t)42);
     CClosureFree(clos);
     AssertBoolEqual(CClosureCheck(clos), false);
 

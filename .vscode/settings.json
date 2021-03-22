@@ -7,10 +7,6 @@
             "\"${config:mdk.modName}\"",
         ]
     },
-    // VSCode settings.
-    "editor.formatOnType": true,
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": false,
     "editor.detectIndentation": false,
     "editor.tabSize": 4,
     "C_Cpp.clang_format_sortIncludes": true,
@@ -28,6 +24,7 @@
         "coef",
         "h",
         "init",
+        "isas",
         "libcclosure",
         "libffcall",
         "libffcall's",
@@ -42,5 +39,6 @@
         "struct",
         "use"
     ],
-    "C_Cpp.intelliSenseEngineFallback": "Disabled"
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "editor.formatOnSave": true
 }

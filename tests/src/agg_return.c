@@ -36,9 +36,9 @@ TestCase {
     Doohickey (*clos0)(int64_t) = CClosureNew(Callback0, &env0, true);
 
     Doohickey ret = clos0(2);
-    AssertInt32Equal(ret.a, 2);
-    AssertInt32Equal(ret.b, 4);
-    AssertInt32Equal(ret.c, 6);
+    AssertIntEqual(ret.a, (int64_t)2);
+    AssertIntEqual(ret.b, (int64_t)4);
+    AssertIntEqual(ret.c, (int64_t)6);
     CClosureFree(clos0);
 
     Pass();

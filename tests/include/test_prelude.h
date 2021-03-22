@@ -28,13 +28,19 @@
 
 /* ----- INTERNAL MACROS ----- */
 
+#ifdef __LP64__
+#define INT64_FMT "%li"
+#else
+#define INT64_FMT "%lli"
+#endif
+
 #define TestCase int32_t main(void)
 
 #define Pass() exit(PASSED)
 
 #define Fail(fmt, ...)                                                         \
     do {                                                                       \
-        fprintf(stderr, fmt, ##__VA_ARGS__);                                   \
+        fprintf(stderr, (fmt), ##__VA_ARGS__);                                 \
         exit(FAILED);                                                          \
     } while (0)
 
@@ -49,12 +55,17 @@
         }                                                                      \
     } while (0)
 
-#define AssertInt32Equal(result, expected)                                     \
+#define AssertIntEqual(result, expected)                                       \
     do {                                                                       \
-        int32_t Assert_result = (result);                                      \
-        int32_t Assert_expected = (expected);                                  \
+        typeof(expected) Assert_result = (result);                             \
+        typeof(expected) Assert_expected = (expected);                         \
         if (Assert_result != Assert_expected) {                                \
-            Fail("AssertInt32Equal @%i failed!\n%i == %i\n(%s == %s)\n",       \
+            Fail(_Generic(                                                     \
+                     (expected), int64_t                                       \
+                     : "AssertIntEqual @%i failed!\n" INT64_FMT                \
+                       " == " INT64_FMT "\n(%s == %s)\n",                      \
+                       default                                                 \
+                     : "AssertIntEqual @%i failed!\n%i == %i\n(%s == %s)\n"),  \
                  __LINE__, Assert_result, Assert_expected, #result,            \
                  #expected);                                                   \
         }                                                                      \
@@ -82,6 +93,16 @@
             Fail("AssertStrEqual @%i failed!\n\"%s\" == \"%s\"\n(%s == %s)\n", \
                  __LINE__, Assert_result, Assert_expected, #result,            \
                  #expected);                                                   \
+        }                                                                      \
+    } while (0)
+
+#define AssertIs(result, expected)                                             \
+    do {                                                                       \
+        void *Assert_result = (result);                                        \
+        void *Assert_expected = (expected);                                    \
+        if (Assert_result != Assert_expected) {                                \
+            Fail("AssertIs @%i failed!\n0x%p == 0x%p\n(%s == %s)\n", __LINE__, \
+                 Assert_result, Assert_expected, #result, #expected);          \
         }                                                                      \
     } while (0)
 

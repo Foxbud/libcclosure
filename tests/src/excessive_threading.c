@@ -45,7 +45,29 @@ static void *ThreadCallClosures(void *ctx) {
     Range range = *(Range *)ctx;
     for (size_t idx = range.start; idx < range.end; idx += range.stride) {
         AssertBoolEqual(CClosureCheck(closures[idx]), true);
-        AssertInt32Equal(closures[idx](), idx * -2);
+        AssertIntEqual(closures[idx](), (int32_t)(idx * -2));
+    }
+
+    return ctx;
+}
+
+static void *ThreadDestroyClosures(void *ctx) {
+    Range range = *(Range *)ctx;
+    for (size_t idx = range.start; idx < range.end; idx += range.stride) {
+        free(CClosureFree(closures[idx]));
+        AssertBoolEqual(CClosureCheck(closures[idx]), false);
+    }
+
+    return ctx;
+}
+
+static void *ThreadConditionalDestroyClosures(void *ctx) {
+    Range range = *(Range *)ctx;
+    for (size_t idx = range.start; idx < range.end; idx += range.stride) {
+        if (!CClosureCheck(closures[idx]))
+            continue;
+        free(CClosureFree(closures[idx]));
+        AssertBoolEqual(CClosureCheck(closures[idx]), false);
     }
 
     return ctx;
@@ -75,6 +97,29 @@ TestCase {
     }
     pthread_join(auxThread, (void **)&range);
     free(range);
+
+    range = malloc(sizeof(Range));
+    *range = (Range){.start = 5, .end = 1000000, .stride = 6};
+    pthread_create(&auxThread, NULL, ThreadDestroyClosures, range);
+    for (size_t idx = 0; idx < 5; idx++) {
+        range = malloc(sizeof(Range));
+        *range = (Range){.start = idx, .end = 1000000, .stride = 6};
+        pthread_create(subThreads + idx, NULL, ThreadCallClosures, range);
+    }
+    pthread_join(auxThread, (void **)&range);
+    free(range);
+
+    for (size_t idx = 0; idx < 5; idx++) {
+        pthread_join(subThreads[idx], (void **)&range);
+        *range = (Range){
+            .start = idx * 200000, .end = (idx + 1) * 200000, .stride = 1};
+        pthread_create(subThreads + idx, NULL, ThreadConditionalDestroyClosures,
+                       range);
+    }
+    for (size_t idx = 0; idx < 5; idx++) {
+        pthread_join(subThreads[idx], (void **)&range);
+        free(range);
+    }
 
     Pass();
 }

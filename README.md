@@ -9,7 +9,7 @@ This library is heavily inspired by and intended as a more permissively-licensed
 ### Supported Operating Systems
 - Linux
 
-### Supported CPU Architectures
+### Supported ISAs
 - x86 ([cdecl](https://en.wikipedia.org/wiki/X86_calling_conventions#cdecl))
 - x86_64 ([sys v](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI))
 
