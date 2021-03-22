@@ -47,7 +47,7 @@ include(GenerateExportHeader)
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-find_package(Threads)
+# find_package(Threads)
 if(CMAKE_USE_PTHREADS_INIT)
     set(THREAD_PTHREADS TRUE)
 endif()
@@ -91,16 +91,16 @@ set_target_properties(cclosure_static PROPERTIES
 set_target_properties(cclosure_shared PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${CCLOSURE_INTERFACE_INCLUDE_DIRECTORIES}"
     OUTPUT_NAME cclosure)
+target_link_options(cclosure_shared
+    PRIVATE
+        -rdynamic
+        $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
+)
 if(THREAD_PTHREADS)
     target_link_libraries(cclosure_static
         PRIVATE Threads::Threads)
     target_link_libraries(cclosure_shared
         PRIVATE Threads::Threads)
-    target_link_options(cclosure_shared
-        PRIVATE
-            -rdynamic
-            $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
-    )
 endif()
 
 # Doxygen.

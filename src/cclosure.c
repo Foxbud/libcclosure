@@ -149,11 +149,13 @@ static MemBank bank = {0};
 
 /* ----- PRIVATE FUNCTIONS ----- */
 
+#ifdef THREAD_PTHREADS
 static void UnlockRwLock(void *lock) {
     pthread_rwlock_unlock((pthread_rwlock_t *)lock);
 
     return;
 }
+#endif
 
 static void MemBlockInit(MemBlock *block, size_t blockIdx) {
 #ifdef THREAD_PTHREADS
