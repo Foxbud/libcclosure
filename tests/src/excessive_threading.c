@@ -1,0 +1,65 @@
+#include <pthread.h>
+
+#include "test_prelude.h"
+
+typedef struct Range {
+    size_t start;
+    size_t end;
+    size_t stride;
+} Range;
+
+#define NUM_CLOSURES ((size_t)1000000)
+static int32_t (*closures[NUM_CLOSURES])(void) = {0};
+
+static int32_t Callback(CClosureCtx ctx) { return *(int32_t *)ctx.env; }
+
+static void *ThreadCreateClosures(void *ctx) {
+    Range range = *(Range *)ctx;
+    for (size_t idx = range.start; idx < range.end; idx += range.stride) {
+        int32_t *env = malloc(sizeof(int32_t));
+        *env = idx * -2;
+        AssertBoolEqual(CClosureCheck(closures[idx]), false);
+        closures[idx] = CClosureNew(Callback, env, false);
+        AssertBoolEqual(CClosureCheck(closures[idx]), true);
+    }
+
+    return ctx;
+}
+
+static void *ThreadCallClosures(void *ctx) {
+    Range range = *(Range *)ctx;
+    for (size_t idx = range.start; idx < range.end; idx += range.stride) {
+        AssertBoolEqual(CClosureCheck(closures[idx]), true);
+        AssertInt32Equal(closures[idx](), idx * -2);
+    }
+
+    return ctx;
+}
+
+TestCase {
+    Range *range = NULL;
+    pthread_t auxThread = {0};
+    pthread_t subThreads[5] = {0};
+
+    range = malloc(sizeof(Range));
+    *range = (Range){.start = 500000, .end = 1000000, .stride = 1};
+    pthread_create(&auxThread, NULL, ThreadCreateClosures, range);
+    for (size_t idx = 0; idx < 5; idx++) {
+        range = malloc(sizeof(Range));
+        *range = (Range){
+            .start = idx * 100000, .end = (idx + 1) * 100000, .stride = 1};
+        pthread_create(subThreads + idx, NULL, ThreadCreateClosures, range);
+    }
+    for (size_t idx = 0; idx < 5; idx++) {
+        pthread_join(subThreads[idx], (void **)&range);
+        pthread_create(subThreads + idx, NULL, ThreadCallClosures, range);
+    }
+    for (size_t idx = 0; idx < 5; idx++) {
+        pthread_join(subThreads[idx], (void **)&range);
+        free(range);
+    }
+    pthread_join(auxThread, (void **)&range);
+    free(range);
+
+    Pass();
+}

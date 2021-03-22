@@ -1,0 +1,41 @@
+{
+    // MDK settings.
+    "mdk": {
+        "modName": "bugcon",
+        // Make sure to surround each mod name with escaped double quotes.
+        "launchMods": [
+            "\"${config:mdk.modName}\"",
+        ]
+    },
+    // VSCode settings.
+    "editor.formatOnType": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "C_Cpp.clang_format_sortIncludes": true,
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "C_Cpp.default.intelliSenseMode": "gcc-x86",
+    "C_Cpp.loggingLevel": "Warning",
+    "files.associations": {
+        "*.h": "c",
+    },
+    "C_Cpp.autoAddFileAssociations": false,
+    "cSpell.words": [
+        "cclosure",
+        "cmake",
+        "coef",
+        "h",
+        "init",
+        "libcclosure",
+        "malloc",
+        "printf",
+        "pthreads",
+        "stdbool",
+        "stddef",
+        "stdlib",
+        "struct",
+        "use"
+    ],
+    "C_Cpp.intelliSenseEngineFallback": "Disabled"
+}

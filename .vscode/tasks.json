@@ -1,0 +1,114 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Generate Debug",
+            "type": "shell",
+            "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug",
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "CC": "${config:C_Cpp.default.compilerPath}"
+                }
+            }
+        },
+        {
+            "label": "Generate Release",
+            "type": "shell",
+            "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release",
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "CC": "${config:C_Cpp.default.compilerPath}"
+                }
+            }
+        },
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "cmake --build build/debug",
+            "dependsOn": [
+                "Generate Debug"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build Release",
+            "type": "shell",
+            "command": "cmake --build build/release",
+            "dependsOn": [
+                "Generate Release"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Test Debug",
+            "type": "shell",
+            "command": "cmake --build build/debug --target test",
+            "dependsOn": [
+                "Build Debug"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "CTEST_OUTPUT_ON_FAILURE": "1"
+                }
+            }
+        },
+        {
+            "label": "Test Release",
+            "type": "shell",
+            "command": "cmake --build build/release --target test",
+            "dependsOn": [
+                "Build Release"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "CTEST_OUTPUT_ON_FAILURE": "1"
+                }
+            }
+        },
+        {
+            "label": "Clean Debug",
+            "type": "shell",
+            "command": "cmake --build build/debug --target clean",
+            "dependsOn": [
+                "Generate Debug"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean Release",
+            "type": "shell",
+            "command": "cmake --build build/release --target clean",
+            "dependsOn": [
+                "Generate Release"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Generate Documentation",
+            "type": "shell",
+            "command": "cmake --build build/debug --target docs",
+            "isBackground": true,
+            "dependsOn": [
+                "Generate Debug"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Launch Documentation Server",
+            "type": "shell",
+            "command": "python3 -m http.server --directory build/debug/html",
+            "dependsOn": [
+                "Generate Documentation"
+            ],
+            "problemMatcher": []
+        },
+    ]
+}

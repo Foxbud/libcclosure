@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/build/debug/include/**",
+                "${workspaceFolder}/build/release/include/**",
+                "${workspaceFolder}/tests/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "${default}",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "${default}",
+            "compileCommands": "build/debug/compile_commands.json"
+        }
+    ],
+    "version": 4
+}
