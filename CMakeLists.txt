@@ -5,6 +5,17 @@ project(CCLOSURE
     DESCRIPTION "Closures for C."
     LANGUAGES C)
 
+# Define options.
+set(ARCH "x86_64" CACHE STRING "Target architecure: x86 x86_64")
+if(NOT "${ARCH}" STREQUAL "x86" AND NOT "${ARCH}" STREQUAL "x86_64")
+    message(FATAL_ERROR
+        "\"${ARCH}\" is not a supported architecture!\n"
+        "Supported architectures:"
+        " x86"
+        " x86_64"
+    )
+endif()
+
 # Handle pre-release version.
 set(PRE_RELEASE TRUE)
 if(PRE_RELEASE)
@@ -47,7 +58,10 @@ target_include_directories(cclosure
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:include>")
 target_compile_options(cclosure 
-    PRIVATE -Wall -Wextra -Werror)
+    PRIVATE
+        -Wall -Wextra -Werror
+        $<$<STREQUAL:${ARCH},x86>:-m32>
+)
 if(THREAD_PTHREADS)
     target_compile_definitions(cclosure
         PRIVATE THREAD_PTHREADS=1)
@@ -69,7 +83,10 @@ if(THREAD_PTHREADS)
     target_link_libraries(cclosure_shared
         PRIVATE Threads::Threads)
     target_link_options(cclosure_shared
-        PRIVATE -rdynamic)
+        PRIVATE
+            -rdynamic
+            $<$<STREQUAL:${ARCH},x86>:-m32>
+    )
 endif()
 
 # Doxygen.
@@ -85,6 +102,31 @@ endif()
 
 
 
+# Installation.
+install(TARGETS cclosure_static cclosure_shared
+    EXPORT CClosureTargets
+    LIBRARY DESTINATION "lib$<$<STREQUAL:${ARCH},x86>:32>"
+    ARCHIVE DESTINATION "lib$<$<STREQUAL:${ARCH},x86>:32>"
+    INCLUDES DESTINATION include
+)
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/cclosure.h"
+    DESTINATION include
+)
+if("${ARCH}" STREQUAL "x86")
+    install(EXPORT CClosureTargets
+        FILE CClosureTargets.cmake
+        NAMESPACE CClosure::
+        DESTINATION lib32/cmake/CClosure
+    )
+else()
+    install(EXPORT CClosureTargets
+        FILE CClosureTargets.cmake
+        NAMESPACE CClosure::
+        DESTINATION lib/cmake/CClosure
+    )
+endif()
+
+
 # Testing.
 if (BUILD_TESTING)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestRunners")
@@ -95,8 +137,20 @@ if (BUILD_TESTING)
             OUTPUT_NAME "TestRunners/${TEST_TARGET}")
         target_include_directories("${TEST_TARGET}"
             PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
-        target_compile_options("${TEST_TARGET}" PRIVATE -Og -g -Wall -Wextra -Werror)
-        target_link_options("${TEST_TARGET}" PRIVATE -rdynamic)
+        target_compile_options("${TEST_TARGET}"
+            PRIVATE
+                -Og
+                -g
+                -Wall
+                -Wextra
+                -Werror
+                $<$<STREQUAL:${ARCH},x86>:-m32>
+        )
+        target_link_options("${TEST_TARGET}"
+            PRIVATE
+                -rdynamic
+                $<$<STREQUAL:${ARCH},x86>:-m32>
+        )
         target_link_libraries("${TEST_TARGET}" PRIVATE cclosure_shared)
         add_test(NAME "test_${TEST_NAME}" COMMAND "${TEST_TARGET}")
     endmacro()
