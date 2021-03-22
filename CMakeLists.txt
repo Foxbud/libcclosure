@@ -20,13 +20,13 @@ project(CCLOSURE
     LANGUAGES C)
 
 # Define options.
-set(BUILD_ARCH "x86_64" CACHE STRING "Target architecure: x86 x86_64")
-if(NOT "${BUILD_ARCH}" STREQUAL "x86" AND NOT "${BUILD_ARCH}" STREQUAL "x86_64")
+set(BUILD_ARCH_OPTS "x86" "x86_64")
+list(JOIN BUILD_ARCH_OPTS " " BUILD_ARCH_OPTS_STR)
+set(BUILD_ARCH "x86_64" CACHE STRING "Target architecure: ${BUILD_ARCH_OPTS_STR}")
+if(NOT "${BUILD_ARCH}" IN_LIST BUILD_ARCH_OPTS)
     message(FATAL_ERROR
         "\"${BUILD_ARCH}\" is not a supported architecture!\n"
-        "Supported architectures:"
-        " x86"
-        " x86_64"
+        "Supported architectures: ${BUILD_ARCH_OPTS_STR}"
     )
 endif()
 
