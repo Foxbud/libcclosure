@@ -2,14 +2,16 @@
 
 **libcclosure** is a library which adds thread-safe [closures](https://en.wikipedia.org/wiki/Closure_(computer_programming)) as first-class functions to the C language.
 
-Supported operating systems:
+## Compatibility
+
+### Supported operating systems
 - Linux
 
-Supported CPU architectures:
+### Supported CPU architecture
 - x86 ([cdecl](https://en.wikipedia.org/wiki/X86_calling_conventions#cdecl))
 - x86_64 ([sys v](https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI))
 
-Supported multi-threading libraries:
+### Supported multi-threading libraries
 - [POSIX Threads](https://en.wikipedia.org/wiki/POSIX_Threads)
 
 ## Quick Start

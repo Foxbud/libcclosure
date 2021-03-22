@@ -23,6 +23,7 @@
     "C_Cpp.autoAddFileAssociations": false,
     "cSpell.words": [
         "cclosure",
+        "cdecl",
         "cmake",
         "coef",
         "h",
