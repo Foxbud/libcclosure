@@ -25,11 +25,11 @@ This library uses [CMake](https://cmake.org/) to generate its build system.
 The first step is to configure the build system by running the following command:
 
 ```
-$ CC=(gcc|clang) cmake -S . -B build \
-    -D CMAKE_BUILD_TYPE=(Debug|Release) \
-    -D BUILD_TESTING=(ON|OFF) \
-    -D BUILD_THREADING=(ON|OFF) \
-    -D BUILD_ARCH=(x86_64|x86)
+$ CC=gcc cmake -S . -B build \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D BUILD_TESTING=OFF \
+    -D BUILD_THREADING=ON \
+    -D BUILD_ARCH=x86_64
 ```
 
 Setting the `CC` environment variable is optional and likely unnecessary unless you want to use a compiler other than your user default. The supported compilers are [GCC](https://gcc.gnu.org/) and [Clang](https://clang.llvm.org/).
@@ -37,6 +37,8 @@ Setting the `CC` environment variable is optional and likely unnecessary unless 
 Unless you you plan to modify libcclosure, itself, you'll likely want to use `Release` for `CMAKE_BUILD_TYPE` and `OFF` for `BUILD_TESTING`.
 
 While thread-safety is one of the primary goals of this library, it also involves non-negligible overhead. If you'll be using libcclosure in a single-threaded environment, you can gain a little extra performance by using `OFF` for `BUILD_THREADING` to prevent the inclusion of thread-safety-related system calls.
+
+Finally, choose a target architecture to build the library for by passing it as `BUILD_ARCH`. The supported architectures are `x86` and `x86_64`.
 
 ### Build
 
@@ -69,7 +71,7 @@ Importable cmake scripts which define the targets `CClosure::cclosure_static` an
 
 ## Quick Start
 
-These closures really are first-class C functions in the sense that they can accept arbitrary arguments (including variadic) and have an arbitrary return type. To create one, first define a callback function that accepts a special closure "context" as its first argument followed by the other desired arguments:
+These closures are first-class C functions in the sense that they can accept arbitrary arguments (including variadic) and have an arbitrary return type. To create one, first define a callback function that accepts a special closure "context" as its first argument followed by the other desired arguments:
 
 ```c
 int Callback(CClosureCtx ctx, double filter, size_t numVArgs, ...) {
