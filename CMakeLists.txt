@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(CCLOSURE
     VERSION 1.0.0
-    DESCRIPTION "Thread-safe closures as first-class functions for C "
+    DESCRIPTION "Thread-safe closures as first-class functions for C"
     LANGUAGES C)
 
 # Define options.
@@ -47,7 +47,7 @@ include(GenerateExportHeader)
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-# find_package(Threads)
+find_package(Threads)
 if(CMAKE_USE_PTHREADS_INIT)
     set(THREAD_PTHREADS TRUE)
 endif()
