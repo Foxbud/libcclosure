@@ -319,8 +319,17 @@ CCLOSURE_EXPORT bool CClosureCheck(void *clos) {
     for (size_t idx = 0; idx < bank.size; idx++) {
         MemBlock *block = bank.blocks + idx;
         void *slots = block->slots;
-        if ((result = (clos >= slots) && (clos < slots + block->rawSize) &&
-                      (((Closure *)clos)->thunk[0] != 0)))
+        if ((clos >= slots) && (clos < slots + block->rawSize)) {
+#ifdef THREAD_PTHREADS
+            pthread_rwlock_rdlock(&block->lock);
+            pthread_cleanup_push(UnlockRwLock, &block->lock);
+#endif
+            result = ((Closure *)clos)->thunk[0] != 0;
+#ifdef THREAD_PTHREADS
+            pthread_cleanup_pop(true);
+#endif
+        }
+        if (result)
             break;
     }
 #ifdef THREAD_PTHREADS
