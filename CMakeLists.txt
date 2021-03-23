@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 3.19)
 # limitations under the License.
 
 
-project(CCLOSURE
+project(CClosure
     VERSION 1.0.0
     DESCRIPTION "Thread-safe closures as first-class functions for C"
     LANGUAGES C)
@@ -29,6 +29,8 @@ if(NOT "${BUILD_ARCH}" IN_LIST BUILD_ARCH_OPTS)
         "Supported architectures: ${BUILD_ARCH_OPTS_STR}"
     )
 endif()
+
+set(BUILD_THREADING TRUE CACHE BOOL "Whether or not to build with multi-threading support")
 
 # Handle pre-release version.
 set(PRE_RELEASE TRUE)
@@ -45,11 +47,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 include(CTest)
 include(GenerateExportHeader)
 
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-find_package(Threads)
-if(CMAKE_USE_PTHREADS_INIT)
-    set(THREAD_PTHREADS TRUE)
+if(BUILD_THREADING)
+    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    find_package(Threads)
+    if(CMAKE_USE_PTHREADS_INIT)
+        set(THREAD_PTHREADS TRUE)
+    else()
+        message(FATAL_ERROR
+            "Build with multi-threading support selected, but could not find pthreads!"
+        )
+    endif()
 endif()
 
 find_package(Doxygen)

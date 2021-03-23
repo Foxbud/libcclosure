@@ -20,27 +20,52 @@ This library is heavily inspired by and intended as a more permissively-licensed
 
 This library uses [CMake](https://cmake.org/) to generate its build system.
 
-### x86_64
+### Configuration
+
+The first step is to configure the build system by running the following command:
 
 ```
-$ cmake -S . -B build/release_x86_64 \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_TESTING=OFF \
-    -DBUILD_ARCH=x86_64
-$ cmake --build build/release_x86_64
-# cmake --build build/release_x86_64 --target install
+$ CC=(gcc|clang) cmake -S . -B build \
+    -D CMAKE_BUILD_TYPE=(Debug|Release) \
+    -D BUILD_TESTING=(ON|OFF) \
+    -D BUILD_THREADING=(ON|OFF) \
+    -D BUILD_ARCH=(x86_64|x86)
 ```
 
-### x86
+Setting the `CC` environment variable is optional and likely unnecessary unless you want to use a compiler other than your user default. The supported compilers are [GCC](https://gcc.gnu.org/) and [Clang](https://clang.llvm.org/).
+
+Unless you you plan to modify libcclosure, itself, you'll likely want to use `Release` for `CMAKE_BUILD_TYPE` and `OFF` for `BUILD_TESTING`.
+
+While thread-safety is one of the primary goals of this library, it also involves non-negligible overhead. If you'll be using libcclosure in a single-threaded environment, you can gain a little extra performance by using `OFF` for `BUILD_THREADING` to prevent the inclusion of thread-safety-related system calls.
+
+### Build
+
+To build the library, run:
 
 ```
-$ cmake -S . -B build/release_x86 \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_TESTING=OFF \
-    -DBUILD_ARCH=x86
-$ cmake --build build/release_x86
-# cmake --build build/release_x86 --target install
+$ cmake --build build/
 ```
+
+This creates both a static (`libcclosure.a`) and shared (`libcclosure.so`) library.
+
+### Installation
+
+```
+# cmake --build build/ --target install
+```
+
+By default, this will install the library to `/usr/local`. You can change the installation directory by instead running:
+
+```
+$ cmake -S . -B build -D CMAKE_INSTALL_PREFIX=$HOME/.local
+$ cmake --build build/ --target install
+```
+
+The header file `cclosure.h` will always be installed to `${CMAKE_INSTALL_PREFIX}/include`.
+
+If you used `x86_64` for `BUILD_ARCH`, then the library files `libcclosure.a` and `libcclosure.so` will be installed to `${CMAKE_INSTALL_PREFIX}/lib`. If, on the other hand, you used `x86`, then the library files will be installed to `${CMAKE_INSTALL_PREFIX}/lib32`.
+
+Importable cmake scripts which define the targets `CClosure::cclosure_static` and `CClosure::cclosure_shared` will also be installed to the directory `${CMAKE_INSTALL_PREFIX}/lib(32)/cmake/CClosure`.
 
 ## Quick Start
 
