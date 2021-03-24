@@ -81,8 +81,9 @@ target_include_directories(cclosure
     "$<INSTALL_INTERFACE:include>")
 target_compile_options(cclosure 
     PRIVATE
-        -Wall -Wextra -Werror
+        -Wall -Wextra -Werror -Wfatal-errors
         $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
+        $<$<STREQUAL:${CMAKE_C_COMPILER_ID},GNU>:-Wno-clobbered>
 )
 if(THREAD_PTHREADS)
     target_compile_definitions(cclosure
@@ -154,12 +155,12 @@ endif()
 
 # Testing.
 if (BUILD_TESTING)
-    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestRunners")
-    macro(make_test TEST_NAME)
-        set(TEST_TARGET "test_${TEST_NAME}_runner")
-        add_executable("${TEST_TARGET}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/src/${TEST_NAME}.c")
+    macro(make_test TEST_NAME TEST_SUITE)
+        set(TEST_TARGET "test_${TEST_SUITE}_${TEST_NAME}_runner")
+        add_executable("${TEST_TARGET}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/src/${TEST_SUITE}/${TEST_NAME}.c")
         set_target_properties("${TEST_TARGET}" PROPERTIES
-            OUTPUT_NAME "TestRunners/${TEST_TARGET}")
+            OUTPUT_NAME "TestRunners/${TEST_SUITE}/${TEST_NAME}")
         target_include_directories("${TEST_TARGET}"
             PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests/include")
         target_compile_options("${TEST_TARGET}"
@@ -169,7 +170,9 @@ if (BUILD_TESTING)
                 -Wall
                 -Wextra
                 -Werror
+                -Wfatal-errors
                 $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
+                $<$<STREQUAL:${CMAKE_C_COMPILER_ID},GNU>:-Wno-clobbered>
         )
         target_link_options("${TEST_TARGET}"
             PRIVATE
@@ -177,10 +180,26 @@ if (BUILD_TESTING)
                 $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
         )
         target_link_libraries("${TEST_TARGET}" PRIVATE cclosure_shared)
-        add_test(NAME "test_${TEST_NAME}" COMMAND "${TEST_TARGET}")
+        add_test(NAME "test_${TEST_SUITE}_${TEST_NAME}" COMMAND "${TEST_TARGET}")
+        set_tests_properties("test_${TEST_SUITE}_${TEST_NAME}" PROPERTIES
+            TIMEOUT 8)
     endmacro()
 
-    make_test(thread_type)
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestRunners/common")
+    macro(make_common_test TEST_NAME)
+        make_test("${TEST_NAME}" common)
+    endmacro()
+
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/TestRunners/threading")
+    macro(make_threading_test TEST_NAME)
+        if(THREAD_PTHREADS)
+            make_test("${TEST_NAME}" threading)
+            target_link_libraries("${TEST_TARGET}"
+                PRIVATE Threads::Threads)
+        endif()
+    endmacro()
+
+    make_common_test(thread_type)
     if(THREAD_PTHREADS)
         target_compile_definitions("${TEST_TARGET}"
             PRIVATE THREAD_TYPE=CCLOSURE_THREAD_PTHREADS)
@@ -189,20 +208,16 @@ if (BUILD_TESTING)
             PRIVATE THREAD_TYPE=CCLOSURE_THREAD_NONE)
     endif()
 
-    make_test(basic_alloc)
-    make_test(basic_usage)
-    make_test(agg_return)
-    make_test(agg_pass)
-    make_test(vargs_pass)
-    make_test(get_fcn)
-    make_test(excessive_alloc)
+    make_common_test(basic_alloc)
+    make_common_test(basic_usage)
+    make_common_test(agg_return)
+    make_common_test(agg_pass)
+    make_common_test(vargs_pass)
+    make_common_test(get_env)
+    make_common_test(get_fcn)
+    make_common_test(excessive_alloc)
 
-    if(THREAD_PTHREADS)
-        make_test(basic_threading)
-        target_link_libraries("${TEST_TARGET}"
-            PRIVATE Threads::Threads)
-        make_test(excessive_threading)
-        target_link_libraries("${TEST_TARGET}"
-            PRIVATE Threads::Threads)
-    endif()
+    make_threading_test(basic)
+    make_threading_test(excessive)
+    make_threading_test(cancel_new)
 endif()

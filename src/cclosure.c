@@ -310,12 +310,11 @@ CCLOSURE_EXPORT void *CClosureFree(void *clos) {
 }
 
 CCLOSURE_EXPORT bool CClosureCheck(void *clos) {
-    bool result;
+    bool result = false;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_rdlock(&bank.lock);
     pthread_cleanup_push(UnlockRwLock, &bank.lock);
 #endif
-    result = false;
     for (size_t idx = 0; idx < bank.size; idx++) {
         MemBlock *block = bank.blocks + idx;
         void *slots = block->slots;

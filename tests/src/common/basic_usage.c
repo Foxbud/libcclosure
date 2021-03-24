@@ -1,18 +1,7 @@
-/*
- * Copyright 2021 Garrett Fairburn <breadboardfox@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/* Verify that two closures can be allocated at the same time without issues.
+ * Also verify that those closures work as expected with a single scalar
+ * argument type and a scalar return type. */
+
 #include "test_prelude.h"
 
 typedef struct Line {

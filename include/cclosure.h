@@ -22,15 +22,15 @@
 #ifndef CCLOSURE_H
 #define CCLOSURE_H
 
-#ifndef __unix__
-#error "cclosure.h only works on unix-like systems."
-#endif /* unix */
+#ifndef __gnu_linux__
+#error "cclosure.h only works on Linux systems."
+#endif
 
 #ifndef __i386__
 #ifndef __x86_64__
-#error "cclosure.h only works on i386 and x86_64 architectures."
-#endif /* __x86_64__ */
-#endif /* __i386__ */
+#error "cclosure.h only works on x86 and x86_64 architectures."
+#endif
+#endif
 
 #include <stdbool.h>
 #include <stddef.h>
