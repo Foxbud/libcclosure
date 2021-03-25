@@ -33,17 +33,53 @@
 /* ----- PRIVATE MACROS ----- */
 
 #ifdef __LP64__
-#define THUNK_SIZE 0x18
+#define IsAggRet(clos) (false)
 #else
-#define THUNK_SIZE 0x18
+#define IsAggRet(clos) (clos->bin[0] == 0x5a)
 #endif
 
 /* ----- PRIVATE TYPES ----- */
 
-typedef struct __attribute__((packed)) Closure {
-    uint8_t thunk[THUNK_SIZE];
-    void *fcn;
-    void *env;
+/* DEBUG */
+
+typedef union Closure {
+#ifdef __LP64__
+    uint8_t bin[34];
+    union {
+        struct __attribute__((packed)) {
+            uint8_t pad0[6];
+            void *env;
+            uint8_t pad1[4];
+            void *fcn;
+            uint8_t pad2[8];
+        } norm;
+        struct __attribute__((packed)) {
+            uint8_t pad0[6];
+            void *env;
+            uint8_t pad1[4];
+            void *fcn;
+            uint8_t pad2[8];
+        } agg;
+    } tmpl;
+#else
+    uint8_t bin[20];
+    union {
+        struct __attribute__((packed)) {
+            uint8_t pad0[1];
+            void *env;
+            uint8_t pad1[1];
+            void *fcn;
+            uint8_t pad2[6];
+        } norm;
+        struct __attribute__((packed)) {
+            uint8_t pad0[4];
+            void *env;
+            uint8_t pad1[2];
+            void *fcn;
+            uint8_t pad2[6];
+        } agg;
+    } tmpl;
+#endif
 } Closure;
 
 typedef struct MemSlot {
@@ -73,67 +109,66 @@ typedef struct MemBank {
 /* ----- PRIVATE CONSTANTS ----- */
 
 #ifdef __LP64__
-/**
- * sub rsp, 8 * 2
- * push [rip+env]
- * call [rip+fcn]
- * add rsp, 8 * 3
- * ret
- * nop;nop;nop
- * fcn:
- * nop;nop;nop;nop;nop;nop;nop;nop
- * env:
- * nop;nop;nop;nop;nop;nop;nop;nop
+/* BITS 64
+ *
+ * %define tmpl_env strict QWORD 0
+ * %define tmpl_fcn strict QWORD 0
+ *
+ * closure_x86_64:
+ * 		sub rsp, 8 * 2
+ * 		mov r11, tmpl_env
+ * 		push r11
+ * 		mov r11, tmpl_fcn
+ * 		call r11
+ * 		add rsp, 8 * 3
+ * 		ret
  */
-static const uint8_t THUNK_NORM_RET[THUNK_SIZE] = {
-    0x48, 0x83, 0xEC, 0x10, 0xFF, 0x35, 0x16, 0x00, 0x00, 0x00, 0xFF, 0x15,
-    0x08, 0x00, 0x00, 0x00, 0x48, 0x83, 0xC4, 0x18, 0xC3, 0x90, 0x90, 0x90};
+static const uint8_t THUNK_NORM_RET[] = {
+    0x48, 0x83, 0xec, 0x10, 0x49, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x41, 0x53, 0x49, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x41, 0xff, 0xd3, 0x48, 0x83, 0xc4, 0x18, 0xc3};
+static const size_t THUNK_NORM_RET_SIZE = 34;
 
 static const uint8_t *THUNK_AGG_RET = THUNK_NORM_RET;
+static const size_t THUNK_AGG_RET_SIZE = THUNK_NORM_RET_SIZE;
 #else
-/**
- * call get_pc_thunk
- * rel:
- * push [eax+(env-rel)]
- * call [eax+(fcn-rel)]
- * add esp, 4 * 1
- * ret
- * get_pc_thunk:
- * mov eax, [esp]
- * ret
- * nop;nop;nop;nop;nop
- * fcn:
- * nop;nop;nop;nop
- * env:
- * nop;nop;nop;nop
+/* BITS 32
+ *
+ * %define tmpl_env strict DWORD 0
+ * %define tmpl_fcn strict DWORD 0
+ *
+ * closure_x86_norm:
+ * 		push tmpl_env
+ * 		mov ecx, tmpl_fcn
+ * 		call ecx
+ * 		add esp, 4
+ * 		ret
  */
-static const uint8_t THUNK_NORM_RET[THUNK_SIZE] = {
-    0xE8, 0x0A, 0x00, 0x00, 0x00, 0xFF, 0x70, 0x17, 0xFF, 0x50, 0x13, 0x83,
-    0xC4, 0x04, 0xC3, 0x8B, 0x04, 0x24, 0xC3, 0x90, 0x90, 0x90, 0x90, 0x90};
+static const uint8_t THUNK_NORM_RET[] = {0x68, 0x00, 0x00, 0x00, 0x00, 0xb9,
+                                         0x00, 0x00, 0x00, 0x00, 0xff, 0xd1,
+                                         0x83, 0xc4, 0x04, 0xc3};
+static const size_t THUNK_NORM_RET_SIZE = 16;
 
-/**
- * call get_pc_thunk
- * rel:
- * pop edx
- * pop ecx
- * push edx
- * push [eax+(env-rel)]
- * push ecx
- * call [eax+(fcn-rel)]
- * add esp, 4 * 1
- * ret
- * get_pc_thunk:
- * mov eax, [esp]
- * ret
- * nop
- * fcn:
- * nop;nop;nop;nop
- * env:
- * nop;nop;nop;nop
+/* BITS 32
+ *
+ * %define tmpl_env strict DWORD 0
+ * %define tmpl_fcn strict DWORD 0
+ *
+ * closure_x86_agg:
+ * 		pop edx
+ * 		pop ecx
+ * 		push edx
+ * 		push tmpl_env
+ * 		push ecx
+ * 		mov ecx, tmpl_fcn
+ * 		call ecx
+ * 		add esp, 4
+ * 		ret
  */
-static const uint8_t THUNK_AGG_RET[THUNK_SIZE] = {
-    0xE8, 0x0E, 0x00, 0x00, 0x00, 0x5A, 0x59, 0x52, 0xFF, 0x70, 0x17, 0x51,
-    0xFF, 0x50, 0x13, 0x83, 0xC4, 0x04, 0xC3, 0x8B, 0x04, 0x24, 0xC3, 0x90};
+static const uint8_t THUNK_AGG_RET[] = {
+    0x5a, 0x59, 0x52, 0x68, 0x00, 0x00, 0x00, 0x00, 0x51, 0xb9,
+    0x00, 0x00, 0x00, 0x00, 0xff, 0xd1, 0x83, 0xc4, 0x04, 0xc3};
+static const size_t THUNK_AGG_RET_SIZE = 20;
 #endif
 
 /* ----- PUBLIC CONSTANTS ----- */
@@ -269,10 +304,15 @@ CCLOSURE_EXPORT void *CClosureNew(void *fcn, void *env, bool aggRet) {
 
     /* Initialize closure. */
     Closure *clos = (Closure *)slot;
-    memcpy(clos->thunk, (aggRet) ? THUNK_AGG_RET : THUNK_NORM_RET,
-           sizeof(clos->thunk));
-    clos->fcn = fcn;
-    clos->env = env;
+    if (aggRet) {
+        memcpy(clos->bin, THUNK_AGG_RET, THUNK_AGG_RET_SIZE);
+        clos->tmpl.agg.fcn = fcn;
+        clos->tmpl.agg.env = env;
+    } else {
+        memcpy(clos->bin, THUNK_NORM_RET, THUNK_NORM_RET_SIZE);
+        clos->tmpl.norm.fcn = fcn;
+        clos->tmpl.norm.env = env;
+    }
 
     return clos;
 }
@@ -280,10 +320,8 @@ CCLOSURE_EXPORT void *CClosureNew(void *fcn, void *env, bool aggRet) {
 CCLOSURE_EXPORT void *CClosureFree(void *clos) {
 #define clos ((Closure *)clos)
     /* Deinitialize closure. */
-    memset(clos->thunk, 0x0, sizeof(clos->thunk));
-    clos->fcn = NULL;
-    void *env = clos->env;
-    clos->env = NULL;
+    void *env = (IsAggRet(clos)) ? clos->tmpl.agg.env : clos->tmpl.norm.env;
+    *clos = (Closure){0};
 
     /* Release free slot. */
     MemSlot *slot = (MemSlot *)clos;
@@ -323,7 +361,7 @@ CCLOSURE_EXPORT bool CClosureCheck(void *clos) {
             pthread_rwlock_rdlock(&block->lock);
             pthread_cleanup_push(UnlockRwLock, &block->lock);
 #endif
-            result = ((Closure *)clos)->thunk[0] != 0;
+            result = ((Closure *)clos)->bin[0] != 0;
 #ifdef THREAD_PTHREADS
             pthread_cleanup_pop(true);
 #endif
@@ -339,9 +377,13 @@ CCLOSURE_EXPORT bool CClosureCheck(void *clos) {
 }
 
 CCLOSURE_EXPORT void *CClosureGetFcn(void *clos) {
-    return ((Closure *)clos)->fcn;
+#define clos ((Closure *)clos)
+    return (IsAggRet(clos)) ? clos->tmpl.agg.fcn : clos->tmpl.norm.fcn;
+#undef clos
 }
 
 CCLOSURE_EXPORT void *CClosureGetEnv(void *clos) {
-    return ((Closure *)clos)->env;
+#define clos ((Closure *)clos)
+    return (IsAggRet(clos)) ? clos->tmpl.agg.env : clos->tmpl.norm.env;
+#undef clos
 }

@@ -22,6 +22,7 @@
         "cdecl",
         "cmake",
         "coef",
+        "else",
         "h",
         "init",
         "isas",
@@ -33,11 +34,12 @@
         "posix",
         "printf",
         "pthreads",
+        "qword",
         "stdbool",
         "stddef",
         "stdlib",
         "struct",
-        "use"
+        "tmpl"
     ],
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "editor.formatOnSave": true
