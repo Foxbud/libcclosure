@@ -33,7 +33,7 @@ endif()
 set(BUILD_THREADING TRUE CACHE BOOL "Whether or not to build with multi-threading support")
 
 # Handle pre-release version.
-set(PRE_RELEASE TRUE)
+set(PRE_RELEASE false)
 if(PRE_RELEASE)
     set(EXTENDED_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}-pre")
 else()
