@@ -23,7 +23,7 @@
 #define CCLOSURE_H
 
 #ifndef __gnu_linux__
-#error "cclosure.h only works on Linux systems."
+#error "cclosure.h only works on GNU/Linux systems."
 #endif
 
 #ifndef __i386__
