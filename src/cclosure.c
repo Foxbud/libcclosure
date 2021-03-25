@@ -85,13 +85,13 @@ typedef union Closure {
 typedef struct MemSlot {
     Closure clos;
     struct MemSlot *nextFree;
-    size_t blockIdx;
+    const size_t blockIdx;
 } MemSlot;
 
 typedef struct MemBlock {
-    size_t rawSize;
+    const size_t rawSize;
     MemSlot *firstFree;
-    MemSlot *slots;
+    MemSlot *const slots;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_t lock;
 #endif
@@ -198,9 +198,10 @@ static void MemBlockInit(MemBlock *block, size_t blockIdx) {
 #ifdef THREAD_PTHREADS
     pthread_rwlock_init(&block->lock, NULL);
 #endif
-    block->rawSize = getpagesize() << ((blockIdx > 11) ? 11 : blockIdx);
+    *(size_t *)&block->rawSize = getpagesize()
+                                 << ((blockIdx > 11) ? 11 : blockIdx);
     size_t cap = block->rawSize / sizeof(MemSlot);
-    block->slots =
+    *(MemSlot **)&block->slots =
         mmap(NULL, block->rawSize, PROT_READ | PROT_WRITE | PROT_EXEC,
              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     block->firstFree = block->slots + 0;
@@ -208,11 +209,11 @@ static void MemBlockInit(MemBlock *block, size_t blockIdx) {
     for (size_t idx = 0; idx < cap - 1; idx++) {
         MemSlot *slot = block->slots + idx;
         slot->nextFree = slot + 1;
-        slot->blockIdx = blockIdx;
+        *(size_t *)&slot->blockIdx = blockIdx;
     }
     MemSlot *last = block->slots + cap - 1;
     last->nextFree = NULL;
-    last->blockIdx = blockIdx;
+    *(size_t *)&last->blockIdx = blockIdx;
 
     return;
 }
@@ -222,7 +223,6 @@ static void MemBlockDeinit(MemBlock *block) {
 #ifdef THREAD_PTHREADS
     pthread_rwlock_destroy(&block->lock);
 #endif
-    *block = (MemBlock){0};
 
     return;
 }
