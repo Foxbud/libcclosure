@@ -219,5 +219,4 @@ if (BUILD_TESTING)
 
     make_threading_test(basic)
     make_threading_test(excessive)
-    make_threading_test(cancel_new)
 endif()
