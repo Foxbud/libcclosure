@@ -43,6 +43,7 @@ endif()
 # Set cmake defaults.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 include(CTest)
 include(GenerateExportHeader)
