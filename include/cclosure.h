@@ -47,7 +47,6 @@
  * @since 1.0.0
  */
 typedef struct CClosurePacked CClosureCtx {
-    // #undef CClosureCtx
     /**
      * @brief The environment bound to the current closure.
      *
