@@ -216,6 +216,8 @@ if (BUILD_TESTING)
     make_common_test(vargs_pass)
     make_common_test(get_env)
     make_common_test(get_fcn)
+    make_common_test(live_free)
+    make_common_test(live_free_agg)
     make_common_test(excessive_alloc)
 
     make_threading_test(basic)
