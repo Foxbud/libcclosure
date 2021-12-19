@@ -53,9 +53,9 @@ typedef struct __attribute__((packed)) Closure {
         union {
             struct __attribute__((packed)) {
                 uint8_t pad0[6];
-                void *env;
+                void* env;
                 uint8_t pad1[4];
-                void *fcn;
+                void* fcn;
             } norm, agg;
         } tmpl;
     } entry;
@@ -66,16 +66,16 @@ typedef struct __attribute__((packed)) Closure {
         union {
             struct __attribute__((packed)) {
                 uint8_t pad0[1];
-                void *env;
+                void* env;
                 uint8_t pad1[1];
-                void *fcn;
+                void* fcn;
                 uint8_t pad2[4];
             } norm;
             struct __attribute__((packed)) {
                 uint8_t pad0[4];
-                void *env;
+                void* env;
                 uint8_t pad1[2];
-                void *fcn;
+                void* fcn;
             } agg;
         } tmpl;
     } entry;
@@ -85,14 +85,14 @@ typedef struct __attribute__((packed)) Closure {
 
 typedef struct MemSlot {
     Closure clos;
-    struct MemSlot *nextFree;
+    struct MemSlot* nextFree;
     const size_t blockIdx;
 } MemSlot;
 
 typedef struct MemBlock {
     const size_t rawSize;
-    MemSlot *firstFree;
-    MemSlot *const slots;
+    MemSlot* firstFree;
+    MemSlot* const slots;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_t lock;
 #endif
@@ -101,7 +101,7 @@ typedef struct MemBlock {
 typedef struct MemBank {
     size_t cap;
     size_t size;
-    MemBlock *blocks;
+    MemBlock* blocks;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_t lock;
 #endif
@@ -126,7 +126,7 @@ static const uint8_t THUNK_ENTRY_NORM[THUNK_ENTRY_SIZE] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x41, 0x53, 0x49, 0xbb,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-static const uint8_t *THUNK_ENTRY_AGG = THUNK_ENTRY_NORM;
+static const uint8_t* THUNK_ENTRY_AGG = THUNK_ENTRY_NORM;
 
 /* BITS 64
  *
@@ -219,42 +219,42 @@ static MemBank bank = {0};
 /* ----- PRIVATE FUNCTIONS ----- */
 
 #ifdef THREAD_PTHREADS
-static void UnlockRwLock(void *lock) {
-    pthread_rwlock_unlock((pthread_rwlock_t *)lock);
+static void UnlockRwLock(void* lock) {
+    pthread_rwlock_unlock((pthread_rwlock_t*)lock);
 
     return;
 }
 #endif
 
-static void MemBlockInit(MemBlock *block, size_t blockIdx) {
+static void MemBlockInit(MemBlock* block, size_t blockIdx) {
 #ifdef THREAD_PTHREADS
     pthread_rwlock_init(&block->lock, NULL);
 #endif
-    *(size_t *)&block->rawSize = getpagesize()
-                                 << ((blockIdx > 11) ? 11 : blockIdx);
+    *(size_t*)&block->rawSize = getpagesize()
+                                << ((blockIdx > 11) ? 11 : blockIdx);
     size_t cap = block->rawSize / sizeof(MemSlot);
-    *(MemSlot **)&block->slots =
+    *(MemSlot**)&block->slots =
         mmap(NULL, block->rawSize, PROT_READ | PROT_WRITE | PROT_EXEC,
              MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     block->firstFree = block->slots + 0;
 
     for (size_t idx = 0; idx < cap - 1; idx++) {
-        MemSlot *slot = block->slots + idx;
+        MemSlot* slot = block->slots + idx;
         memcpy(slot->clos.entry.bin, THUNK_ENTRY_UNINIT, THUNK_ENTRY_SIZE);
-        memcpy((void *)slot->clos.exit, THUNK_EXIT, THUNK_EXIT_SIZE);
+        memcpy((void*)slot->clos.exit, THUNK_EXIT, THUNK_EXIT_SIZE);
         slot->nextFree = slot + 1;
-        *(size_t *)&slot->blockIdx = blockIdx;
+        *(size_t*)&slot->blockIdx = blockIdx;
     }
-    MemSlot *last = block->slots + cap - 1;
+    MemSlot* last = block->slots + cap - 1;
     memcpy(last->clos.entry.bin, THUNK_ENTRY_UNINIT, THUNK_ENTRY_SIZE);
-    memcpy((void *)last->clos.exit, THUNK_EXIT, THUNK_EXIT_SIZE);
+    memcpy((void*)last->clos.exit, THUNK_EXIT, THUNK_EXIT_SIZE);
     last->nextFree = NULL;
-    *(size_t *)&last->blockIdx = blockIdx;
+    *(size_t*)&last->blockIdx = blockIdx;
 
     return;
 }
 
-static void MemBlockDeinit(MemBlock *block) {
+static void MemBlockDeinit(MemBlock* block) {
     munmap(block->slots, block->rawSize);
 #ifdef THREAD_PTHREADS
     pthread_rwlock_destroy(&block->lock);
@@ -289,16 +289,16 @@ __attribute__((destructor)) static void Destructor(void) {
 
 /* ----- PUBLIC FUNCTIONS ----- */
 
-CCLOSURE_EXPORT void *CClosureNew(void *fcn, void *env, bool aggRet) {
+CCLOSURE_EXPORT void* CClosureNew(void* fcn, void* env, bool aggRet) {
     /* Find block with free slot. */
-    MemBlock *block = NULL;
+    MemBlock* block = NULL;
 #ifdef THREAD_PTHREADS
     int32_t origCancelState;
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &origCancelState);
     pthread_rwlock_rdlock(&bank.lock);
 #endif
     for (size_t idx = 0; idx < bank.size; idx++) {
-        MemBlock *curBlock = bank.blocks + idx;
+        MemBlock* curBlock = bank.blocks + idx;
 #ifdef THREAD_PTHREADS
         if (pthread_rwlock_trywrlock(&curBlock->lock) != 0)
             continue;
@@ -329,7 +329,7 @@ CCLOSURE_EXPORT void *CClosureNew(void *fcn, void *env, bool aggRet) {
     }
 
     /* Consume free slot. */
-    MemSlot *slot = block->firstFree;
+    MemSlot* slot = block->firstFree;
     block->firstFree = slot->nextFree;
     slot->nextFree = NULL;
 #ifdef THREAD_PTHREADS
@@ -339,7 +339,7 @@ CCLOSURE_EXPORT void *CClosureNew(void *fcn, void *env, bool aggRet) {
 #endif
 
     /* Initialize closure entry. */
-    Closure *clos = (Closure *)slot;
+    Closure* clos = (Closure*)slot;
     if (aggRet) {
         memcpy(clos->entry.bin, THUNK_ENTRY_AGG, THUNK_ENTRY_SIZE);
         clos->entry.tmpl.agg.fcn = fcn;
@@ -353,10 +353,10 @@ CCLOSURE_EXPORT void *CClosureNew(void *fcn, void *env, bool aggRet) {
     return clos;
 }
 
-CCLOSURE_EXPORT void *CClosureFree(void *clos) {
-#define clos ((Closure *)clos)
+CCLOSURE_EXPORT void* CClosureFree(void* clos) {
+#define clos ((Closure*)clos)
     /* Deinitialize closure entry. */
-    void *env =
+    void* env =
         (IsAggRet(clos)) ? clos->entry.tmpl.agg.env : clos->entry.tmpl.norm.env;
 #ifdef THREAD_PTHREADS
     int32_t origCancelState;
@@ -365,11 +365,11 @@ CCLOSURE_EXPORT void *CClosureFree(void *clos) {
     memcpy(clos->entry.bin, THUNK_ENTRY_UNINIT, THUNK_ENTRY_SIZE);
 
     /* Release free slot. */
-    MemSlot *slot = (MemSlot *)clos;
+    MemSlot* slot = (MemSlot*)clos;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_rdlock(&bank.lock);
 #endif
-    MemBlock *block = bank.blocks + slot->blockIdx;
+    MemBlock* block = bank.blocks + slot->blockIdx;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_wrlock(&block->lock);
 #endif
@@ -385,21 +385,21 @@ CCLOSURE_EXPORT void *CClosureFree(void *clos) {
 #undef clos
 }
 
-CCLOSURE_EXPORT bool CClosureCheck(void *clos) {
+CCLOSURE_EXPORT bool CClosureCheck(void* clos) {
     bool result = false;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_rdlock(&bank.lock);
     pthread_cleanup_push(UnlockRwLock, &bank.lock);
 #endif
     for (size_t idx = 0; idx < bank.size; idx++) {
-        MemBlock *block = bank.blocks + idx;
-        void *slots = block->slots;
+        MemBlock* block = bank.blocks + idx;
+        void* slots = block->slots;
         if ((clos >= slots) && (clos < slots + block->rawSize)) {
 #ifdef THREAD_PTHREADS
             pthread_rwlock_rdlock(&block->lock);
             pthread_cleanup_push(UnlockRwLock, &block->lock);
 #endif
-            result = ((Closure *)clos)->entry.bin[0] != 0x90;
+            result = ((Closure*)clos)->entry.bin[0] != 0x90;
 #ifdef THREAD_PTHREADS
             pthread_cleanup_pop(true);
 #endif
@@ -414,15 +414,15 @@ CCLOSURE_EXPORT bool CClosureCheck(void *clos) {
     return result;
 }
 
-CCLOSURE_EXPORT void *CClosureGetFcn(void *clos) {
-#define clos ((Closure *)clos)
+CCLOSURE_EXPORT void* CClosureGetFcn(void* clos) {
+#define clos ((Closure*)clos)
     return (IsAggRet(clos)) ? clos->entry.tmpl.agg.fcn
                             : clos->entry.tmpl.norm.fcn;
 #undef clos
 }
 
-CCLOSURE_EXPORT void *CClosureGetEnv(void *clos) {
-#define clos ((Closure *)clos)
+CCLOSURE_EXPORT void* CClosureGetEnv(void* clos) {
+#define clos ((Closure*)clos)
     return (IsAggRet(clos)) ? clos->entry.tmpl.agg.env
                             : clos->entry.tmpl.norm.env;
 #undef clos

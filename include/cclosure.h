@@ -52,17 +52,17 @@ typedef struct CClosurePacked CClosureCtx {
      *
      * @since 1.0.0
      */
-    void *env;
+    void* env;
 #ifdef __LP64__
     /**
      * @internal
      */
-    void *pad[2];
+    void* pad[2];
 #endif
     /**
      * @internal
      */
-    const void *const ret;
+    const void* const ret;
 } CClosureCtx;
 
 /**
@@ -122,7 +122,7 @@ extern const CClosureThreadType CCLOSURE_THREAD_TYPE;
  *
  * @sa CClosureFree
  */
-void *CClosureNew(void *fcn, void *env, bool aggRet);
+void* CClosureNew(void* fcn, void* env, bool aggRet);
 
 /**
  * @brief Destroy a closure previously created using ::CClosureNew.
@@ -146,7 +146,7 @@ void *CClosureNew(void *fcn, void *env, bool aggRet);
  *
  * @sa CClosureNew
  */
-void *CClosureFree(void *clos);
+void* CClosureFree(void* clos);
 
 /**
  * @brief Query whether or not a given reference points to an initialized
@@ -160,7 +160,7 @@ void *CClosureFree(void *clos);
  *
  * @since 1.0.0
  */
-bool CClosureCheck(void *clos);
+bool CClosureCheck(void* clos);
 
 /**
  * @brief Query the callback function bound to a closure.
@@ -174,7 +174,7 @@ bool CClosureCheck(void *clos);
  *
  * @since 1.0.0
  */
-void *CClosureGetFcn(void *clos);
+void* CClosureGetFcn(void* clos);
 
 /**
  * @brief Query the environment bound to a closure.
@@ -188,6 +188,6 @@ void *CClosureGetFcn(void *clos);
  *
  * @since 1.0.0
  */
-void *CClosureGetEnv(void *clos);
+void* CClosureGetEnv(void* clos);
 
 #endif /* CCLOSURE_H */

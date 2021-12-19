@@ -4,7 +4,7 @@
 #include "test_prelude.h"
 
 TestCase {
-    void *clos0 = NULL;
+    void* clos0 = NULL;
 
     AssertBoolEqual(CClosureCheck(clos0), false);
     clos0 = CClosureNew(NULL, NULL, false);

@@ -5,7 +5,9 @@
 
 #include "test_prelude.h"
 
-void Callback0(void) { return; }
+void Callback0(void) {
+    return;
+}
 
 void SigIllHandler(int signum) {
     AssertIntEqual(signum, SIGILL);

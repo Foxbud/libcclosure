@@ -9,7 +9,7 @@ typedef struct Doohickey {
 } Doohickey;
 
 static Doohickey Callback0(CClosureCtx ctx, int64_t coef) {
-    Doohickey *env = ctx.env;
+    Doohickey* env = ctx.env;
 
     return (Doohickey){
         .a = env->a * coef,

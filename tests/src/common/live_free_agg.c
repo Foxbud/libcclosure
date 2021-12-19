@@ -12,9 +12,9 @@ typedef struct Doohickey {
 static int64_t MAGIC = 73982007135488;
 
 static Doohickey Callback0(CClosureCtx ctx) {
-    AssertBoolEqual(CClosureCheck(*(void **)ctx.env), true);
-    CClosureFree(*(void **)ctx.env);
-    AssertBoolEqual(CClosureCheck(*(void **)ctx.env), false);
+    AssertBoolEqual(CClosureCheck(*(void**)ctx.env), true);
+    CClosureFree(*(void**)ctx.env);
+    AssertBoolEqual(CClosureCheck(*(void**)ctx.env), false);
 
     return (Doohickey){.a = MAGIC, .b = MAGIC - 1, .c = ~MAGIC};
 }

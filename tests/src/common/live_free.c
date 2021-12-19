@@ -6,9 +6,9 @@
 static int64_t MAGIC = 73982007135488;
 
 static int64_t Callback0(CClosureCtx ctx) {
-    AssertBoolEqual(CClosureCheck(*(void **)ctx.env), true);
-    CClosureFree(*(void **)ctx.env);
-    AssertBoolEqual(CClosureCheck(*(void **)ctx.env), false);
+    AssertBoolEqual(CClosureCheck(*(void**)ctx.env), true);
+    CClosureFree(*(void**)ctx.env);
+    AssertBoolEqual(CClosureCheck(*(void**)ctx.env), false);
 
     return MAGIC;
 }

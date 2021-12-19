@@ -6,11 +6,13 @@
 #define NUM_CLOSURES ((size_t)1000000)
 static int32_t (*closures[NUM_CLOSURES])(void) = {0};
 
-static int32_t Callback(CClosureCtx ctx) { return *(int32_t *)ctx.env; }
+static int32_t Callback(CClosureCtx ctx) {
+    return *(int32_t*)ctx.env;
+}
 
 TestCase {
     for (size_t idx = 0; idx < NUM_CLOSURES; idx++) {
-        int32_t *env = malloc(sizeof(int32_t));
+        int32_t* env = malloc(sizeof(int32_t));
         *env = idx * -2;
         AssertBoolEqual(CClosureCheck(closures[idx]), false);
         closures[idx] = CClosureNew(Callback, env, false);

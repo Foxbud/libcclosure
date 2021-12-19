@@ -10,13 +10,13 @@ typedef struct Line {
 } Line;
 
 static double LineGetY(CClosureCtx ctx, double x) {
-    Line *line = ctx.env;
+    Line* line = ctx.env;
 
     return line->m * x + line->b;
 }
 
 TestCase {
-    Line *env = NULL;
+    Line* env = NULL;
     const double EP = 0.00001;
 
     double (*clos0)(double) =

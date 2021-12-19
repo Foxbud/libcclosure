@@ -6,10 +6,10 @@
 #include "test_prelude.h"
 
 static int32_t Callback(CClosureCtx ctx, int32_t val) {
-    return *(int32_t *)ctx.env * val;
+    return *(int32_t*)ctx.env * val;
 }
 
-static void *ThreadCallClosure(void *ctx) {
+static void* ThreadCallClosure(void* ctx) {
     int32_t (*closure)(int32_t) = ctx;
     for (size_t idx = 0; idx < 1000000; idx++) {
         AssertIntEqual(closure(idx), (int32_t)(idx * 42));
@@ -23,7 +23,7 @@ TestCase {
     pthread_t thread1 = {0};
 
     int32_t env = 42;
-    void *closure = CClosureNew(Callback, &env, false);
+    void* closure = CClosureNew(Callback, &env, false);
 
     pthread_create(&thread0, NULL, ThreadCallClosure, closure);
     pthread_create(&thread1, NULL, ThreadCallClosure, closure);
