@@ -218,6 +218,7 @@ if (BUILD_TESTING)
     make_common_test(get_fcn)
     make_common_test(live_free)
     make_common_test(live_free_agg)
+    make_common_test(graceful_fail)
     make_common_test(excessive_alloc)
 
     make_threading_test(basic)
