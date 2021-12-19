@@ -128,12 +128,14 @@ void *CClosureNew(void *fcn, void *env, bool aggRet);
 /**
  * @brief Destroy a closure previously created using ::CClosureNew.
  *
+ * @remark This function is safe to call on closures that are being executed.
+ * This means that closures can free themselves.
+ *
  * @subsubsection CClosureFreeWarn Thread-Safety Warning
  *
  * While this function is thread-safe in the majority of cases, **it is
  * not thread-safe and will result in undefined behavior** if it is called
  * while argument `clos`:
- * - is being or gets called,
  * - is being called with or gets passed to ::CClosureGetFcn,
  * - or is being called with or gets passed to ::CClosureGetEnv.
  *
