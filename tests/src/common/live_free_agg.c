@@ -21,7 +21,7 @@ static Doohickey Callback0(CClosureCtx ctx) {
 
 TestCase {
     Doohickey (*closure)(void);
-    closure = CClosureNew(Callback0, &closure, false);
+    closure = CClosureNew(Callback0, &closure, true);
 
     AssertBoolEqual(CClosureCheck(closure), true);
     Doohickey val = closure();
