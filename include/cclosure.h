@@ -105,9 +105,8 @@ extern const CClosureThreadType CCLOSURE_THREAD_TYPE;
  * @brief Create a new closure by binding an environment to a function.
  *
  * @remark This function is completely thread-safe.
- * @remark The closure returned by this function is thread-safe if both
- * argument `env` is treated as readonly or is mediated by a lock, and the
- * situation mentioned in @ref CClosureFreeWarn does not apply.
+ * @remark The closure returned by this function is thread-safe if argument
+ * `env` is treated as readonly or is mediated by a lock.
  *
  * @param[in] fcn Pointer to the function to bind to. Its first parameter *must*
  * be of type CClosureCtx.
@@ -134,7 +133,7 @@ void *CClosureNew(void *fcn, void *env, bool aggRet);
  * @subsubsection CClosureFreeWarn Thread-Safety Warning
  *
  * While this function is thread-safe in the majority of cases, **it is
- * not thread-safe and will result in undefined behavior** if it is called
+ * not thread-safe and may result in undefined behavior** if it is called
  * while argument `clos`:
  * - is being called with or gets passed to ::CClosureGetFcn,
  * - or is being called with or gets passed to ::CClosureGetEnv.
