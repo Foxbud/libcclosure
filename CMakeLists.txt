@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.19)
 
 
 project(CClosure
-    VERSION 1.1.0
+    VERSION 1.2.0
     DESCRIPTION "Thread-safe closures as first-class functions for C"
     LANGUAGES C)
 
@@ -33,7 +33,7 @@ endif()
 set(BUILD_THREADING TRUE CACHE BOOL "Whether or not to build with multi-threading support")
 
 # Handle pre-release version.
-set(PRE_RELEASE false)
+set(PRE_RELEASE true)
 if(PRE_RELEASE)
     set(EXTENDED_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}-pre")
 else()
