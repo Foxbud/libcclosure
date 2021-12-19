@@ -358,26 +358,27 @@ CCLOSURE_EXPORT void *CClosureFree(void *clos) {
     /* Deinitialize closure entry. */
     void *env =
         (IsAggRet(clos)) ? clos->entry.tmpl.agg.env : clos->entry.tmpl.norm.env;
+#ifdef THREAD_PTHREADS
+    int32_t origCancelState;
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &origCancelState);
+#endif
     memcpy(clos->entry.bin, THUNK_ENTRY_UNINIT, THUNK_ENTRY_SIZE);
 
     /* Release free slot. */
     MemSlot *slot = (MemSlot *)clos;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_rdlock(&bank.lock);
-    pthread_cleanup_push(UnlockRwLock, &bank.lock);
 #endif
     MemBlock *block = bank.blocks + slot->blockIdx;
 #ifdef THREAD_PTHREADS
-    int32_t origCancelState;
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &origCancelState);
     pthread_rwlock_wrlock(&block->lock);
 #endif
     slot->nextFree = block->firstFree;
     block->firstFree = slot;
 #ifdef THREAD_PTHREADS
     pthread_rwlock_unlock(&block->lock);
+    pthread_rwlock_unlock(&bank.lock);
     pthread_setcancelstate(origCancelState, &origCancelState);
-    pthread_cleanup_pop(true);
 #endif
 
     return env;
