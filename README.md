@@ -124,7 +124,9 @@ void *env = CClosureFree(closure);
 
 Note that `CClosureFree` returns the previously-bound environment.
 
-`CClosureFree` is thread-safe in the sense that multiple threads may safely call it (along with `CClosureNew`) in parallel. However, `CClosureFree` does **not** block if other threads (or even the same thread) are in the middle of calls to the closure. Make certain that the closure is no longer in use before de-allocating it.
+`CClosureFree` is thread-safe in the sense that multiple threads may safely call it (along with `CClosureNew`) in parallel. It is also safe for a closure to free itself and still return as normal. However, there are
+situations in which calling this function along with others (such as `CClosureGetEnv` and `CClosureGetFcn`)
+in parallel may result in undefined behavior.
 
 Test whether or not libcclosure was compiled with multi-threading support using the `CCLOSURE_THREAD_TYPE` global:
 
