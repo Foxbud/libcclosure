@@ -42,7 +42,7 @@
 /* ----- PUBLIC TYPES ------ */
 
 /**
- * @brief Closure context passsed as the first argument to every closure.
+ * @brief Closure context passed as the first argument to every closure.
  *
  * @since 1.0.0
  */
