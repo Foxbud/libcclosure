@@ -32,7 +32,7 @@ $ CC=gcc cmake -S . -B build \
     -D BUILD_ARCH=x86_64
 ```
 
-Setting the `CC` environment variable is optional and likely unnecessary unless you want to use a compiler other than your user default. The supported compilers are [GCC](https://gcc.gnu.org/) and [Clang](https://clang.llvm.org/).
+Setting the `CC` environment variable is optional and likely unnecessary unless you want to use a compiler other than your user default. The supported compilers are [GCC](https://gcc.gnu.org/), [Clang](https://clang.llvm.org/), and [TCC](https://bellard.org/tcc/).
 
 Unless you you plan to modify libcclosure, itself, you'll likely want to use `Release` for `CMAKE_BUILD_TYPE` and `OFF` for `BUILD_TESTING`.
 
