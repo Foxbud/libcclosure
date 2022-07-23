@@ -63,11 +63,11 @@ $ cmake -S . -B build -D CMAKE_INSTALL_PREFIX=$HOME/.local
 $ cmake --build build/ --target install
 ```
 
-The header file `cclosure.h` will always be installed to `${CMAKE_INSTALL_PREFIX}/include`.
+The header file `cclosure.h` will be installed to `${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}`.
 
-If you used `x86_64` for `BUILD_ARCH`, then the library files `libcclosure.a` and `libcclosure.so` will be installed to `${CMAKE_INSTALL_PREFIX}/lib`. If, on the other hand, you used `x86`, then the library files will be installed to `${CMAKE_INSTALL_PREFIX}/lib32`.
+The library files `libcclosure.a` and `libcclosure.so` will be installed to `${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}`.
 
-Importable cmake scripts which define the targets `CClosure::cclosure_static` and `CClosure::cclosure_shared` will also be installed to the directory `${CMAKE_INSTALL_PREFIX}/lib(32)/cmake/CClosure`.
+Importable cmake scripts which define the targets `CClosure::cclosure_static` and `CClosure::cclosure_shared` will be installed to the directory `${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_CMAKEDIR}/CClosure`.
 
 ## Quick Start
 
