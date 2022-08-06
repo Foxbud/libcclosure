@@ -26,7 +26,7 @@
         {
             "label": "Build Debug",
             "type": "shell",
-            "command": "cmake --build build/debug",
+            "command": "cmake --build build/debug -j 8",
             "dependsOn": [
                 "Generate Debug"
             ],
@@ -39,7 +39,7 @@
         {
             "label": "Build Release",
             "type": "shell",
-            "command": "cmake --build build/release",
+            "command": "cmake --build build/release -j 8",
             "dependsOn": [
                 "Generate Release"
             ],
