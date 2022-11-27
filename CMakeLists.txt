@@ -32,7 +32,12 @@ endif()
 # Set cmake defaults.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+
+# Set build configuration defaults.
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3" CACHE STRING "Debug build flags.")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -g0 -DNDEBUG" CACHE STRING "Release build flags.")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g3" CACHE STRING "Release with debug info build flags.")
+set(CMAKE_C_FLAGS_MINSIZEREL "-Os -g0 -DNDEBUG" CACHE STRING "Minimum size release build flags.")
 
 include(CTest)
 include(GenerateExportHeader)
@@ -192,7 +197,7 @@ if (BUILD_TESTING)
         )
         target_compile_options("${TEST_TARGET}"
             PRIVATE
-                -Og -g -Wall -Wextra -Werror -Wfatal-errors
+                -O0 -g3 -Wall -Wextra -Werror -Wfatal-errors
                 $<$<STREQUAL:${BUILD_ARCH},x86>:-m32>
                 $<$<STREQUAL:${CMAKE_C_COMPILER_ID},GNU>:-Wno-clobbered>
         )
