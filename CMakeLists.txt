@@ -22,7 +22,7 @@ project(CClosure
 )
 
 # Handle pre-release version.
-set(PRE_RELEASE true)
+set(PRE_RELEASE FALSE)
 if(PRE_RELEASE)
     set(EXTENDED_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}-pre")
 else()
