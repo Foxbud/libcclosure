@@ -32,7 +32,7 @@ $ CC=gcc cmake -S . -B build \
     -D BUILD_ARCH=x86_64
 ```
 
-Setting the `CC` environment variable is optional and likely unnecessary unless you want to use a compiler other than your user default. The supported compilers are [GCC](https://gcc.gnu.org/) and [Clang](https://clang.llvm.org/).
+Setting the `CC` environment variable is optional and likely unnecessary unless you want to use a compiler other than your user default. The supported compilers are [GCC](https://gcc.gnu.org/), [Clang](https://clang.llvm.org/), and [TCC](https://bellard.org/tcc/).
 
 Unless you you plan to modify libcclosure, itself, you'll likely want to use `Release` for `CMAKE_BUILD_TYPE` and `OFF` for `BUILD_TESTING`.
 
@@ -63,11 +63,11 @@ $ cmake -S . -B build -D CMAKE_INSTALL_PREFIX=$HOME/.local
 $ cmake --build build/ --target install
 ```
 
-The header file `cclosure.h` will always be installed to `${CMAKE_INSTALL_PREFIX}/include`.
+The header file `cclosure.h` will be installed to `${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}`.
 
-If you used `x86_64` for `BUILD_ARCH`, then the library files `libcclosure.a` and `libcclosure.so` will be installed to `${CMAKE_INSTALL_PREFIX}/lib`. If, on the other hand, you used `x86`, then the library files will be installed to `${CMAKE_INSTALL_PREFIX}/lib32`.
+The library files `libcclosure.a` and `libcclosure.so` will be installed to `${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}`.
 
-Importable cmake scripts which define the targets `CClosure::cclosure_static` and `CClosure::cclosure_shared` will also be installed to the directory `${CMAKE_INSTALL_PREFIX}/lib(32)/cmake/CClosure`.
+Importable cmake scripts which define the targets `CClosure::cclosure_static` and `CClosure::cclosure_shared` will be installed to the directory `${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_CMAKEDIR}/CClosure`.
 
 ## Quick Start
 

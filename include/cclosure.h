@@ -5,7 +5,7 @@
  *
  * @since 1.0.0
  *
- * @copyright 2021 Garrett Fairburn <breadboardfox@gmail.com>
+ * @copyright 2023 Garrett Fairburn <breadboardfox@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@
 #ifndef CCLOSURE_H
 #define CCLOSURE_H
 
-#ifndef __gnu_linux__
-#error "cclosure.h only works on GNU/Linux systems."
+#ifndef __linux__
+#error "cclosure.h only works on Linux systems."
 #endif
 
 #ifndef __i386__
@@ -42,7 +42,7 @@
 /* ----- PUBLIC TYPES ------ */
 
 /**
- * @brief Closure context passsed as the first argument to every closure.
+ * @brief Closure context passed as the first argument to every closure.
  *
  * @since 1.0.0
  */

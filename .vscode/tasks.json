@@ -5,28 +5,18 @@
             "label": "Generate Debug",
             "type": "shell",
             "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug",
-            "problemMatcher": [],
-            "options": {
-                "env": {
-                    "CC": "${config:C_Cpp.default.compilerPath}"
-                }
-            }
+            "problemMatcher": []
         },
         {
             "label": "Generate Release",
             "type": "shell",
             "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release",
-            "problemMatcher": [],
-            "options": {
-                "env": {
-                    "CC": "${config:C_Cpp.default.compilerPath}"
-                }
-            }
+            "problemMatcher": []
         },
         {
             "label": "Build Debug",
             "type": "shell",
-            "command": "cmake --build build/debug",
+            "command": "cmake --build build/debug -j 8",
             "dependsOn": [
                 "Generate Debug"
             ],
@@ -39,7 +29,7 @@
         {
             "label": "Build Release",
             "type": "shell",
-            "command": "cmake --build build/release",
+            "command": "cmake --build build/release -j 8",
             "dependsOn": [
                 "Generate Release"
             ],
